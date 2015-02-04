@@ -5,10 +5,11 @@
   "keywords": [
     "dataurl",
     "images",
-    "css"
+    "css",
+    "cli"
   ],
   "bin": {
-    "img2data": "index.js"
+    "img2data": "img2data"
   },
   "dependencies": {
     "chalk": "^0.5.1",

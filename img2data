@@ -14,11 +14,11 @@ var filetypes = ['png', 'jpg', 'jpeg', 'gif'];
     .option('-a, --all', 'Covert all images in current directory');
 
   program.on('--help', function () {
-    util.log('  File types:');
-    util.log('  png | jpg | jpeg | gif\n');
-    util.log('  Examples:');
-    util.log('  $ img2data img1.png img2.gif img3.png img4.jpeg > target.css');
-    util.log('  $ img2data -a > target.css\n');
+    console.log('  File types:');
+    console.log('  png | jpg | jpeg | gif\n');
+    console.log('  Examples:');
+    console.log('  $ img2data img1.png img2.gif img3.png img4.jpeg > target.css');
+    console.log('  $ img2data -a > target.css\n');
   });
 
   program.parse(process.argv);
