@@ -1,0 +1,26 @@
+{
+  "name": "img2data",
+  "version": "1.0.0",
+  "description": "A Node.js command line utility to convert images to data url",
+  "keywords": [
+    "dataurl",
+    "images",
+    "css"
+  ],
+  "bin": {
+    "img2data": "index.js"
+  },
+  "dependencies": {
+    "chalk": "^0.5.1",
+    "commander": "^2.6.0"
+  },
+  "author": "Vin",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vinnpc/img2data.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vinnpc/img2data/issues"
+  }
+}
