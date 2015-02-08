@@ -1,7 +1,7 @@
 {
   "name": "img2data",
   "version": "1.0.2",
-  "description": "A Node.js command line utility to convert images to data URIs.",
+  "description": "A Node.js command-line utility to convert images to data URIs",
   "keywords": [
     "datauri",
     "image",

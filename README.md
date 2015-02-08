@@ -1,7 +1,7 @@
 data2img
 =====
 
-A Node.js command line utility to convert images to data URIs.
+A Node.js command-line utility to convert images to data URIs.
 
 [https://www.npmjs.com/package/img2data](https://www.npmjs.com/package/img2data)
 
