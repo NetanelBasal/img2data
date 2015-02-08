@@ -9,7 +9,7 @@
     "cli"
   ],
   "bin": {
-    "img2data": "img2data"
+    "img2data": "img2data.js"
   },
   "dependencies": {
     "chalk": "^0.5.1",

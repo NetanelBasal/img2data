@@ -4,118 +4,127 @@ var program = require('commander'),
     util = require('util'),
     chalk = require('chalk'),
     fs = require('fs');
-
-var filetypes = ['png', 'jpg', 'jpeg', 'gif'];
-
+var imgformatsStr = 'png | jpg | jpeg | gif | svg',
+    imgformatsArr = imgformatsStr.split(' | ');
 (function init() {
-  program
-    .version('0.0.1')
-    .usage('<filenames> | [options]')
-    .option('-a, --all', 'Covert all images in current directory');
-
-  program.on('--help', function () {
-    console.log('  File types:');
-    console.log('  png | jpg | jpeg | gif\n');
-    console.log('  Examples:');
-    console.log('  $ img2data img1.png img2.gif img3.png img4.jpeg > target.css');
-    console.log('  $ img2data -a > target.css\n');
-  });
-
-  program.parse(process.argv);
-  if (program.all) {
-    convertAll()
-  } else if (!program.args.length) {
-    program.help();
-  } else {
-    convertOpt(program.args);
-  }
-})();
-
-function convertOpt (files) {
-  var files, file, meta, result, imgData;
-
-  result = '';
-
-  for (var i = 0, length = files.length; i < length; i++) {
-    var file = files[i],
-        meta = analyseFile(file);
-
-    if (!meta) {
-      util.log(chalk.red('[ERR] ') + util.format('File `%s` is not a image file >_<.', file));
-      process.exit(0);
-    }
-
-    if (!checkType(meta.type)) {
-      util.log(chalk.red('[ERR] ') + util.format('File type of `%s` must be png | jpg | jpeg | gif >_<.', file));
-      process.exit(0);
-    }
-
-    imgData = img2data(file);
-    if (!imgData) {
-      process.exit(0);
-    }
-
-    css = util.format('.%s {\n  background: url(data:image/%s;base64,%s);\n}\n\n', meta.name, meta.type, imgData);
-    result += css;
-  }
-  util.print(result);
-}
-
-function convertAll () {
-  var files, file, result, imgData;
-
-  result = '';
-  files = fs.readdirSync('./');
-
-  for (var i = 0, length = files.length; i < length; i++) {
-    var file = analyseFile(files[i]);
-
-    if (!file) continue;
-
-    if (!checkType(meta.type)) continue;
-
-    imgData = img2data(file.source);
-    if (!imgData) {
-      process.exit(0);
-    }
-
-    css = util.format('.%s {\n background: url(data:image/%s;base64,%s);\n}\n\n', meta.name, meta.type, imgData);
-    result += css;
-  }
-  util.print(result);
-}
-
-function analyseFile (file) {
-  var data = file.split('.');
-  if (data.length <= 1) {
-    return false;
-  }
-
-  return {
-    type: data[data.length - 1].toLowerCase(),
-    name: data.slice(0, data.length - 1).join('_').replace(/@/g, '_')
-  };
-}
-
-function checkType (filetype) {
-  if (filetypes.indexOf(filetype) === -1) {
-    return false;
-  }
-  return true;
-}
-
-function img2data(file) {
-  try {
-    var bitmap = fs.readFileSync(file);
-  } catch (e) {
-    if (e.code === 'ENOENT') {
-      util.log(chalk.red('[ERR] ') + util.format('File `%s` is not found >_<.', file));
+    program.version('0.0.1').usage('<filenames> | [options]')
+        .option('-a, --all', 'Covert all images in current directory');
+    program.on('--help', function() {
+        console.log('  Supported Image Formats:');
+        console.log(util.format('  %s \n', imgformatsStr));
+        console.log(chalk.blue('  Usage Examples:'));
+        console.log('  $ img2data img1.png img2.jpg img3.jpeg img4.gif img5.svg > output.css');
+        console.log('  $ img2data -a > output.css\n');
+    });
+    program.parse(process.argv);
+    if (program.all) {
+        convertAll()
+    } else if (!program.args.length) {
+        program.help();
     } else {
-      util.log(chalk.red('[ERR] '));
-      throw e;
+        convertOpt(program.args);
     }
-    return false;
-  }
-  var string = new Buffer(bitmap).toString('base64');
-  return string;
+})();
+// data2img *.png *.svg ...
+function convertOpt(imgs) {
+    var imgs, img, meta, result, imgData, css;
+    result = '';
+    for (var i = 0, length = imgs.length; i < length; i++) {
+        var img = imgs[i],
+            meta = analyse(img);
+        if (!meta) {
+            errlog('not_img', img);
+            process.exit(0);
+        }
+        if (!checkFormat(meta.format)) {
+            errlog('format', img);
+            process.exit(0);
+        }
+        imgData = img2data(img);
+        if (!imgData) {
+            process.exit(0);
+        }
+        css = getCSS(meta, imgData);
+        result += css;
+    }
+    util.print(result);
+}
+// data2img -a
+function convertAll() {
+    var imgs, img, result, imgData, css;
+    result = '';
+    imgs = fs.readdirSync('./');
+    for (var i = 0, length = imgs.length; i < length; i++) {
+        var img = imgs[i],
+            meta = analyse(img);
+        if (!img) continue;
+        if (!checkFormat(meta.format)) continue;
+        imgData = img2data(img);
+        if (!imgData) {
+            process.exit(0);
+        }
+        css = getCSS(meta, imgData);
+        result += css;
+    }
+    util.print(result);
+}
+/*
+  return file meta data
+  {format: 'png|jpg|jpeg|svg+xml',
+  name: ''}
+*/
+function analyse(img) {
+    var data = img.split('.');
+    if (data.length <= 1) {
+        return false;
+    }
+    return {
+        format: data[data.length - 1].toLowerCase(),
+        name: data.slice(0, data.length - 1).join('_').replace(/@/g, '_')
+    };
+}
+// return .class { background-image: url()}
+function getCSS(meta, imgData) {
+    var imgformat = meta.format === 'svg' ? meta.format + '+xml' : meta.format;
+    return util.format('.%s {\n    background-image: url("data:image/%s;base64,%s");\n}\n\n', meta.name, imgformat, imgData);
+}
+
+function checkFormat(format) {
+    if (imgformatsArr.indexOf(format) === -1) {
+        return false;
+    }
+    return true;
+}
+// img 2 data uri
+function img2data(img) {
+    try {
+        var bitmap = fs.readFileSync(img);
+    } catch (e) {
+        if (e.code === 'ENOENT') {
+            errlog('not_found', img);
+        } else {
+            errlog('err', img);
+            throw e;
+        }
+        return false;
+    }
+    var string = new Buffer(bitmap).toString('base64');
+    return string;
+}
+// Error log
+function errlog(type, img) {
+    switch (type) {
+        case 'not_img':
+            util.log(chalk.red('[ERR] ') + util.format('`%s` is not a image file >_<.', img));
+            break;
+        case 'format':
+            util.log(chalk.red('[ERR] ') + util.format('Format of `%s` must be %s >_<.', img, imgformatsStr));
+            break;
+        case 'not_found':
+            util.log(chalk.red('[ERR] ') + util.format('`%s` is not found >_<.', img));
+            break;
+        case 'err':
+            util.log(chalk.red('[ERR] ') + util.format('Error happens while handling `%s` >_<.', img));
+            break;
+    }
 }
