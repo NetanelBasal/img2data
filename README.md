@@ -1,4 +1,4 @@
-data2img
+img2data
 =====
 
 A Node.js command-line utility to convert images to data URIs.
