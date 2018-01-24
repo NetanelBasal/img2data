@@ -86,7 +86,7 @@ function analyse(img) {
 // return .class { background-image: url()}
 function getCSS(meta, imgData) {
     var imgformat = meta.format === 'svg' ? meta.format + '+xml' : meta.format;
-    return util.format('.%s {\n    background-repeat: no-repeat; background-image: url("data:image/%s;base64,%s");\n}\n\n', meta.name, imgformat, imgData);
+    return util.format('.%s {\n    background-repeat: no-repeat; background-image: url("data:image/%s;base64,%s");\n}\n\n', meta.name.toLowerCase(), imgformat, imgData);
 }
 
 function checkFormat(format) {
